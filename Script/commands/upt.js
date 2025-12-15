@@ -4,11 +4,11 @@ const path = require("path");
 
 module.exports.config = {
   name: "upt",
-  version: "1.0.6",
+  version: "2.0.0",
   hasPermssion: 0,
-  credits: "Rx Abdullah",
+  credits: "rX",
   usePrefix: true,
-  description: "Bot status image",
+  description: "Neon Bot Status Image",
   commandCategory: "system",
   usages: "",
   cooldowns: 5,
@@ -16,73 +16,99 @@ module.exports.config = {
 
 module.exports.run = async function ({ api, event }) {
   try {
-    // 🖼 Background image
+    // 🖼 Background
     const bgPath = path.join(__dirname, "cache", "status_bg.png");
-    const bgImage = await loadImage(bgPath);
+    const bg = await loadImage(bgPath);
 
-    // 🎨 Canvas setup
-    const canvas = createCanvas(bgImage.width, bgImage.height);
+    const canvas = createCanvas(bg.width, bg.height);
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
 
-    // 🕒 Calculate uptime & ping
+    // 🌑 Dark overlay
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 🟦 Neon frame
+    ctx.strokeStyle = "#00fff0";
+    ctx.lineWidth = 6;
+    ctx.shadowColor = "#00fff0";
+    ctx.shadowBlur = 25;
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+    // ⏱ Uptime
     const uptime = process.uptime();
-    const hours = Math.floor(uptime / 3600);
-    const minutes = Math.floor((uptime % 3600) / 60);
-    const seconds = Math.floor(uptime % 60);
+    const h = Math.floor(uptime / 3600);
+    const m = Math.floor((uptime % 3600) / 60);
+    const s = Math.floor(uptime % 60);
     const ping = Date.now() - event.timestamp;
     const owner = "rX";
 
-    // ✍️ Base text style
-    ctx.fillStyle = "#FFFFFF";
-    ctx.shadowColor = "black";
-    ctx.shadowBlur = 6;
+    // 🔤 Text base
     ctx.textAlign = "left";
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#00eaff";
+    ctx.shadowBlur = 18;
 
-    // 🧠 Title
-    ctx.font = "bold 55px Arial, sans-serif";
-    ctx.fillText("⚡ BOT STATUS ⚡", 50, 100);
+    // ⚡ Title
+    ctx.font = "bold 60px Sans";
+    ctx.fillText("BOT STATUS", 80, 110);
 
-    // 🧱 Text positions
-    const startX = 120;
-    const line1Y = 200;
-    const line2Y = 270;
-    const line3Y = 340;
+    // Divider line
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(80, 135);
+    ctx.lineTo(canvas.width - 80, 135);
+    ctx.stroke();
 
-    // 🔠 Bold text
-    ctx.font = "bold 40px Arial, sans-serif";
+    // 📍 Positions
+    const iconX = 80;
+    const textX = 150;
+    const y1 = 210;
+    const y2 = 290;
+    const y3 = 370;
 
-    // Draw uptime
-    ctx.fillText(`UPTIME : ${hours}h ${minutes}m ${seconds}s`, startX, line1Y);
+    ctx.font = "bold 40px Sans";
 
-    // Draw ping
-    ctx.fillText(`PING   : ${ping}ms`, startX, line2Y);
+    // 🧠 Text
+    ctx.fillText(`${h}h ${m}m ${s}s`, textX, y1);
+    ctx.fillText(`${ping} ms`, textX, y2);
+    ctx.fillText(owner, textX, y3);
 
-    // Draw owner
-    ctx.fillText(`OWNER  : ${owner}`, startX, line3Y);
+    // 🔹 Labels
+    ctx.font = "24px Sans";
+    ctx.fillText("UPTIME", textX, y1 - 35);
+    ctx.fillText("PING", textX, y2 - 35);
+    ctx.fillText("OWNER", textX, y3 - 35);
 
-    // 🧩 Emoji icons (image-based)
-    const emojiClock = await loadImage("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/23f1.png"); // ⏱
-    const emojiSignal = await loadImage("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4f6.png"); // 📶
-    const emojiBolt = await loadImage("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/26a1.png"); // ⚡
+    // 🧩 Icons
+    const iconClock = await loadImage("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/23f1.png");
+    const iconSignal = await loadImage("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4f6.png");
+    const iconCrown = await loadImage("https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f451.png");
 
-    ctx.drawImage(emojiClock, 50, line1Y - 45, 50, 50);
-    ctx.drawImage(emojiSignal, 50, line2Y - 45, 50, 50);
-    ctx.drawImage(emojiBolt, 50, line3Y - 45, 50, 50);
+    ctx.shadowBlur = 0;
+    ctx.drawImage(iconClock, iconX, y1 - 55, 48, 48);
+    ctx.drawImage(iconSignal, iconX, y2 - 55, 48, 48);
+    ctx.drawImage(iconCrown, iconX, y3 - 55, 48, 48);
 
-    // 🖼 Output image
-    const outPath = path.join(__dirname, "cache", `status_${event.senderID}.png`);
+    // 🪪 Footer
+    ctx.font = "20px Sans";
+    ctx.fillStyle = "#aefcff";
+    ctx.fillText("Powered by rX Bot", canvas.width - 280, canvas.height - 40);
+
+    // 💾 Save
+    const outPath = path.join(__dirname, "cache", `upt_${event.senderID}.png`);
     fs.writeFileSync(outPath, canvas.toBuffer("image/png"));
 
-    // 📤 Send & cleanup
+    // 📤 Send
     return api.sendMessage(
       { attachment: fs.createReadStream(outPath) },
       event.threadID,
       () => fs.unlinkSync(outPath),
       event.messageID
     );
+
   } catch (err) {
     console.error(err);
-    return api.sendMessage("❌ Error while generating status photo!", event.threadID, event.messageID);
+    return api.sendMessage("❌ Status image generate failed!", event.threadID, event.messageID);
   }
 };
